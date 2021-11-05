@@ -1,27 +1,20 @@
 import { Layout, Menu, List, Card } from 'antd'
-import { DashboardOutlined } from '@ant-design/icons'
 import React, { useEffect, useState } from 'react'
-import db from '../lib/firebase'
 import { ref, child, get } from 'firebase/database'
 import dynamic from 'next/dynamic'
 import MobileDetect from 'mobile-detect'
-import { isMobile } from 'react-device-detect'
-import { ListItems } from '../components/listItems'
-import { Warning } from '../components/warning'
-
-const Pie = dynamic(
-  () => import('@ant-design/charts').then((mod) => mod.Pie),
-  { ssr: false }
-)
-const Bar = dynamic(
-  () => import('@ant-design/charts').then((mod) => mod.Bar),
-  { ssr: false }
-)
+import db from '../lib/firebase'
 
 const { Sider, Header, Footer, Content } = Layout
+const ListItems = dynamic(() => import('../components/listItems'))
+const Warning = dynamic(() => import('../components/warning'))
+const isMobile = dynamic(() => import('react-device-detect').then(mod => mod.isMobile), { ssr: false })
+const DashboardOutlined = dynamic(() => import('@ant-design/icons/DashboardOutlined'), { ssr: false })
+const Pie = dynamic(() => import('@ant-design/charts').then((mod) => mod.Pie), { ssr: false })
+const Bar = dynamic(() => import('@ant-design/charts').then((mod) => mod.Bar), { ssr: false })
 
-// eslint-disable-next-line react/prop-types
-export default function Home ({ isMobile }) {
+/* eslint-disable react/prop-types */
+export default function Home (props) {
   const [data, setData] = useState(undefined)
   const [ClickData, setClickData] = useState(undefined)
 
@@ -39,10 +32,12 @@ export default function Home ({ isMobile }) {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Header>
-        <h1 style={{ color: 'GrayText', fontWeight: 'bolder' }}>Dashboard</h1>
+        <h1 style={{ color: 'white', fontWeight: 'bold' }}>행신고 우산 대여 현황</h1>
         </Header>
       <Layout>
-        <Sider collapsed={true}>
+        {props.isMobile
+          ? null
+          : <Sider collapsed={true}>
           <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
             {
               data && Object.keys(data).map((key, index) => {
@@ -60,12 +55,12 @@ export default function Home ({ isMobile }) {
               })
             }
           </Menu>
-        </Sider>
+        </Sider> /* 모바일은 삭제 되게 변경 */ }
           <Content style={{ margin: '16px' }}>
             <Warning data={ClickData}/>
             <div style={{ background: '#fff', padding: 24, minHeight: 260 }}>
             <h1 style={{ textAlign: 'left', fontWeight: 'bolder' }}>누적 우산 수량</h1>
-            { isMobile
+            { props.isMobile
               ? <div>{ ClickData && <Bar {...{
                 data: [
                   {
@@ -89,7 +84,8 @@ export default function Home ({ isMobile }) {
                     return item.value.toFixed(0)
                   },
                   style: { fill: '#fff' }
-                }
+                },
+                height: 200
               }} /> }
               { ClickData && <Pie {...{
                 data: [
@@ -128,6 +124,10 @@ export default function Home ({ isMobile }) {
                     },
                     content: `${ClickData.umbrella_val.returned_val}개\n대여 가능`
                   }
+                },
+                legend: {
+                  layout: 'vertical',
+                  position: 'under'
                 }
               }} /> }
               </div>
@@ -201,19 +201,19 @@ export default function Home ({ isMobile }) {
   <div style={{ clear: 'both' }}>
     { ClickData && <ListItems name="최근 반납한 기록" dataSource={Object.keys(ClickData.user_state.returned_all_log)} renderItem={item => (
       <List.Item>
-        <Card title={item} type="inner">{dateFormat(ClickData.user_state.returned_all_log[item].date_log, ClickData.user_state.returned_all_log[item].time_log)}</Card>
+        <Card title={ClickData.user_state.returned_all_log[item].student_id ? studentView(ClickData.user_state.returned_all_log[item].student_id) : item + ' (학번 없음)'} type="inner">{dateFormat(ClickData.user_state.returned_all_log[item].date_log, ClickData.user_state.returned_all_log[item].time_log)}</Card>
       </List.Item>
     )}/>}
 
     { ClickData && <ListItems name="최근 대여된 기록" dataSource={Object.keys(ClickData.user_state.shared)} renderItem={item => (
       <List.Item>
-        <Card title={item} type="inner">{dateFormat(ClickData.user_state.shared[item].date_log, ClickData.user_state.shared[item].time_log)}</Card>
+        <Card title={ClickData.user_state.shared[item].student_id ? studentView(ClickData.user_state.shared[item].student_id) : item + ' (학번 없음)'} type="inner">{dateFormat(ClickData.user_state.shared[item].date_log, ClickData.user_state.shared[item].time_log)}</Card>
       </List.Item>)}/>}
       </div>
     </div>
         </Content>
       </Layout>
-      <Footer style={{ textAlign: 'center' }}>행신과우산들 © 2021 Created by CodIT</Footer>
+      <Footer style={{ textAlign: 'center' }}>행신고 무인 우산 대여 장치 프로젝트<br/>© 2021~latest CodIT &amp; Warehouse</Footer>
     </Layout>
   )
 }
@@ -224,13 +224,30 @@ function dateFormat (dateLog, timeLog) {
   return '20' + date[0] + '년 ' + date[1] + '월 ' + date[2] + '일 ' + time[0] + '시 ' + time[1] + '분 ' + time[2] + '초'
 }
 
-Home.getInitialProps = async (ctx) => {
+function studentView (id) {
+  const str = id.toString()
+  const qks = str.substr(1, 1) === '0' ? str.substr(2, 1) : str.substr(1, 2)
+  const qjs = str.substr(3, 1) === '0' ? str.substr(4, 1) : str.substr(3, 2)
+  return str.substr(0, 1) + '학년 ' + qks + '반 ' + qjs + '번'
+}
+
+export async function getServerSideProps ({ req, res }) {
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  )
+
   let mobile
-  if (ctx.req) {
-    const md = new MobileDetect(ctx.req.headers['user-agent'])
+  if (req) {
+    const md = new MobileDetect(req.headers['user-agent'])
     mobile = !!md.mobile()
   } else {
     mobile = isMobile
   }
-  return { isMobile: mobile }
+
+  return {
+    props: {
+      isMobile: mobile
+    }
+  }
 }

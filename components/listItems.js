@@ -2,7 +2,7 @@ import React from 'react'
 import { List } from 'antd'
 
 /* eslint-disable react/prop-types */
-export function ListItems (props) {
+export default function ListItems (props) {
   return <List
           header={<div>{props.name}</div>}
           grid={{

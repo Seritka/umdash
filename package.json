@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint:fix": "eslint . --fix",
-    "lint": "eslint ."
+    "lint": "next lint"
   },
   "dependencies": {
     "@ant-design/charts": "^1.2.14",
@@ -25,6 +25,7 @@
     "remark-html": "^12.0.0"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^12.0.2",
     "eslint": "^7.32.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.2",

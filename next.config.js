@@ -1,5 +1,5 @@
 module.exports = {
-  experimental: {
-    swcMinify: true
-  }
+  extends: [
+    'plugin:@next/next/recommended'
+  ]
 }

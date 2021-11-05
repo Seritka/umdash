@@ -2,7 +2,7 @@ import React from 'react'
 import { Alert } from 'antd'
 
 /* eslint-disable react/prop-types */
-export function Warning (props) {
+export default function Warning (props) {
   return <div>
         { props.data && !props.data.service_state
           ? <Alert
