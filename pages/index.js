@@ -1,6 +1,6 @@
 import { Layout, Menu, List, Card } from 'antd'
 import React, { useEffect, useState } from 'react'
-import { ref, child, get } from 'firebase/database'
+import { ref, child, onValue } from 'firebase/database'
 import dynamic from 'next/dynamic'
 import MobileDetect from 'mobile-detect'
 import db from '../lib/firebase'
@@ -19,7 +19,7 @@ export default function Home (props) {
   const [ClickData, setClickData] = useState(undefined)
 
   useEffect(() => {
-    get(child(ref(db), '/')).then((snapshot) => {
+    onValue(child(ref(db), '/'), (snapshot) => {
       if (snapshot.exists()) {
         if (snapshot.val().machine_1) setClickData(snapshot.val().machine_1)
         setData(snapshot.val())
