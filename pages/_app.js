@@ -1,4 +1,5 @@
 import 'antd/dist/antd.css'
+import '../styles/fonts.css'
 import Head from 'next/head'
 import * as React from 'react'
 
