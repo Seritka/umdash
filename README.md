@@ -25,11 +25,12 @@ air_quality
 ㄴdata
     ㄴ all_log
         ㄴ [string] (format: 00_00_00_00_00_00)
-        ㄴ dust: [string]
-        ㄴ humi: [string]
-        ㄴ temp: [string]
-        ㄴ date_log: [string] (format: 00_00_00)
-        ㄴ time_log: [string] (format: 00_00_00)
+            ㄴ dust: [string]
+            ㄴ humi: [string]
+            ㄴ temp: [string]
+            ㄴ date_log: [string] (format: 00_00_00)
+            ㄴ time_log: [string] (format: 00_00_00)
+       ...
     ㄴ dust: [string]
     ㄴ humi: [string]
     ㄴ temp: [string]
