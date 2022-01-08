@@ -1,6 +1,7 @@
 import React from 'react'
 import { List, Card } from 'antd'
 import dynamic from 'next/dynamic'
+import { studentView, dateFormat } from '../lib/utils'
 
 const ListItems = dynamic(() => import('../components/listItems'))
 const Pie = dynamic(() => import('@ant-design/charts').then((mod) => mod.Pie), { ssr: false })
@@ -34,7 +35,10 @@ const Umdash = (props) => {
           },
           style: { fill: '#fff' }
         },
-        height: 200
+        height: 200,
+        legend: {
+          layout: 'vertical'
+        }
       }} /> }
       { props.data && <Pie {...{
         data: [
@@ -75,8 +79,8 @@ const Umdash = (props) => {
           }
         },
         legend: {
-          layout: 'vertical',
-          position: 'under'
+          position: 'under',
+          layout: 'vertical'
         }
       }} /> }
       </div>
@@ -159,19 +163,6 @@ const Umdash = (props) => {
 <Card title={props.data.user_state.shared[item].student_id ? studentView(props.data.user_state.shared[item].student_id) : item + ' (학번 없음)'} type="inner">{dateFormat(props.data.user_state.shared[item].date_log, props.data.user_state.shared[item].time_log)}</Card>
 </List.Item>)}/>}
 </div></>)
-}
-
-function studentView (id) {
-  const str = id.toString()
-  const qks = str.substr(1, 1) === '0' ? str.substr(2, 1) : str.substr(1, 2)
-  const qjs = str.substr(3, 1) === '0' ? str.substr(4, 1) : str.substr(3, 2)
-  return str.substr(0, 1) + '학년 ' + qks + '반 ' + qjs + '번'
-}
-
-function dateFormat (dateLog, timeLog) {
-  const date = dateLog.split('_')
-  const time = timeLog.split('_')
-  return '20' + date[0] + '년 ' + date[1] + '월 ' + date[2] + '일 ' + time[0] + '시 ' + time[1] + '분 ' + time[2] + '초'
 }
 
 export default React.memo(Umdash)
